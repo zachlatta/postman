@@ -66,7 +66,7 @@ Flags:
 
 `
 
-const missingFlagsTemplate = `Flags missing:
+const missingFlagsTemplate = `Missing required flags:
 {{range .}}
   -{{.Name | printf "%-11s"}} {{.Usage}}{{end}}
 
