@@ -27,6 +27,28 @@ $ postman -html template.html -text template.txt -csv recipients.csv \
     -user zaphod -password Betelgeuse123
 ```
 
+`template.html`:
+
+```
+<h1>Hello, {{.Name}}!</h1>
+```
+
+`template.txt`:
+
+```
+Hello, {{.Name}}!
+```
+
+`recipients.csv`:
+
+```
+Email,Name
+arthur@dent.com,Arthur Dent
+ford@prefect.com,Ford Prefect,
+martin@gpp.com,Martin
+trillian@mcmillan.com,Trillian
+```
+
 ## License
 
 The MIT License (MIT)
