@@ -2,6 +2,7 @@
 
 **UNDER DEVELOPMENT**
 
+<img src="http://i.imgur.com/eF4fOlg.png" alt="Postman Icon" align="right" />
 Postman is a command-line utility for batch sending email.
 
 #### Features
