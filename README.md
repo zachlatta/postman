@@ -1,5 +1,7 @@
 # Postman
 
+**UNDER DEVELOPMENT**
+
 Postman is a command-line utility for batch sending email.
 
 ## License
