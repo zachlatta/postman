@@ -4,6 +4,29 @@
 
 Postman is a command-line utility for batch sending email.
 
+#### Features
+
+* Fast, templated, bulk emails
+* Reads template attributes from CSV
+* Works with any SMTP server
+
+### Installation
+
+    $ go get github.com/zachlatta/postman
+
+### Usage
+
+    $ postman [flags]
+
+#### Example
+
+```
+$ postman -html template.html -text template.txt -csv recipients.csv \
+    -sender "Zaphod Beeblebrox <zaphod@beeblebrox.com>" \
+    -subject "Hello, World!" -server smtp.beeblebrox.com -port 587 \
+    -user zaphod -password Betelgeuse123
+```
+
 ## License
 
 The MIT License (MIT)
