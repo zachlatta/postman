@@ -6,12 +6,15 @@ import (
 	"log"
 	"os"
 	"pkg/text/template"
+
+	"github.com/zachlatta/postman/mail"
 )
 
 var (
 	htmlTemplatePath, textTemplatePath        string
 	csvPath                                   string
 	smtpURL, smtpUser, smtpPassword, smtpPort string
+	sender, subject                           string
 )
 
 var flags []*flag.Flag
@@ -21,8 +24,11 @@ func main() {
 	flag.StringVar(&textTemplatePath, "text", "", "text template path")
 	flag.StringVar(&csvPath, "csv", "", "path to csv of contact list")
 	flag.StringVar(&smtpURL, "server", "", "url of smtp server")
+	flag.StringVar(&smtpPort, "port", "", "port of smtp server")
 	flag.StringVar(&smtpUser, "user", "", "smtp username")
 	flag.StringVar(&smtpPassword, "password", "", "smtp password")
+	flag.StringVar(&sender, "sender", "", "email to send from")
+	flag.StringVar(&subject, "subject", "", "subject of email")
 
 	flag.VisitAll(func(f *flag.Flag) {
 		flags = append(flags, f)
@@ -34,6 +40,22 @@ func main() {
 	log.SetFlags(0)
 
 	checkAndHandleMissingFlags(flags)
+
+	mailer := mail.NewMailer(
+		smtpUser,
+		smtpPassword,
+		smtpURL,
+		smtpPort,
+	)
+
+	message := &mail.Message{
+		Sender:   sender,
+		To:       []string{"zach@zachlatta.com"},
+		Subject:  subject,
+		Template: textTemplatePath,
+	}
+
+	mailer.Send(message)
 }
 
 func checkAndHandleMissingFlags(flags []*flag.Flag) {
