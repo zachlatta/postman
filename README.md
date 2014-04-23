@@ -27,19 +27,19 @@ $ postman -html template.html -text template.txt -csv recipients.csv \
     -user zaphod -password Betelgeuse123
 ```
 
-`template.html`:
+template.html:
 
 ```
 <h1>Hello, {{.Name}}!</h1>
 ```
 
-`template.txt`:
+template.txt:
 
 ```
 Hello, {{.Name}}!
 ```
 
-`recipients.csv`:
+recipients.csv:
 
 ```
 Email,Name
