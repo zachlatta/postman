@@ -45,7 +45,7 @@ recipients.csv:
 ```
 Email,Name
 arthur@dent.com,Arthur Dent
-ford@prefect.com,Ford Prefect,
+ford@prefect.com,Ford Prefect
 martin@gpp.com,Martin
 trillian@mcmillan.com,Trillian
 ```
