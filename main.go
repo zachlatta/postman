@@ -67,21 +67,25 @@ func main() {
 		smtpPort,
 	)
 
-	// TODO: Make concurrent
-	for _, recipient := range *recipients {
-		message := &mail.Message{
-			Sender:   sender,
-			To:       []string{recipient[*emailField]},
-			Subject:  subject,
-			Template: textTemplatePath,
-			Context:  recipient,
-		}
+	success := make(chan Recipient)
+	fail := make(chan error)
 
-		if err := mailer.Send(message); err != nil {
-			fmt.Fprintln(os.Stderr, "Error sending email:", err.Error())
+	go func() {
+		for _, recipient := range *recipients {
+			go sendMail(recipient, *emailField, &mailer, success, fail)
+		}
+	}()
+
+	for i := 0; i < len(*recipients); i++ {
+		select {
+		case <-success:
+			fmt.Printf("\rEmailed recipient %d of %d...", i+1, len(*recipients))
+		case err := <-fail:
+			fmt.Fprintln(os.Stderr, "\nError sending email:", err.Error())
 			os.Exit(2)
 		}
 	}
+	fmt.Println()
 }
 
 func checkAndHandleMissingFlags(flags []*flag.Flag) {
@@ -195,4 +199,23 @@ func readCSV(path string) (*[]Recipient, *string, error) {
 	}
 
 	return &recipients, &emailField, nil
+}
+
+func sendMail(recipient Recipient, emailField string, mailer *mail.Mailer,
+	success chan Recipient, fail chan error) {
+
+	message := &mail.Message{
+		Sender:   sender,
+		To:       []string{recipient[emailField]},
+		Subject:  subject,
+		Template: textTemplatePath,
+		Context:  recipient,
+	}
+
+	if err := mailer.Send(message); err != nil {
+		fail <- err
+		return
+	}
+
+	success <- recipient
 }
