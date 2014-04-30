@@ -155,11 +155,12 @@ func readCSV(path string) (*[]Recipient, *string, error) {
 
 	var (
 		header     []string
+		headerRead bool
 		emailField string
 		recipients []Recipient
 	)
 
-	reader, headerRead := csv.NewReader(file), false
+	reader := csv.NewReader(file)
 	for {
 		fields, err := reader.Read()
 		if err == io.EOF {
