@@ -77,7 +77,10 @@ func main() {
 			Context:  recipient,
 		}
 
-		mailer.Send(message)
+		if err := mailer.Send(message); err != nil {
+			fmt.Fprint(os.Stderr, err.Error())
+			os.Exit(2)
+		}
 	}
 }
 
