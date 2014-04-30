@@ -1,4 +1,4 @@
-// Adapted from Google Appengine mail package.
+// Adapted from the Google App Engine github.com/scorredoira/email packages.
 package mail
 
 import (
