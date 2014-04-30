@@ -49,14 +49,14 @@ func main() {
 
 	csv, err := os.Open(csvPath)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, err.Error())
+		fmt.Fprintln(os.Stderr, "Error opening CSV:", err.Error())
 		os.Exit(2)
 	}
 	defer csv.Close()
 
 	recipients, emailField, err := readCSV(csvPath)
 	if err != nil {
-		fmt.Fprint(os.Stderr, err.Error())
+		fmt.Fprintln(os.Stderr, "Error reading CSV:", err.Error())
 		os.Exit(2)
 	}
 
@@ -78,7 +78,7 @@ func main() {
 		}
 
 		if err := mailer.Send(message); err != nil {
-			fmt.Fprint(os.Stderr, err.Error())
+			fmt.Fprintln(os.Stderr, "Error sending email:", err.Error())
 			os.Exit(2)
 		}
 	}
