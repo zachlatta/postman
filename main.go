@@ -1,14 +1,20 @@
 package main
 
 import (
+	"encoding/csv"
+	"errors"
 	"flag"
+	"fmt"
 	"io"
 	"log"
 	"os"
-	"pkg/text/template"
+	"strings"
+	"text/template"
 
 	"github.com/zachlatta/postman/mail"
 )
+
+type Recipient map[string]string
 
 var (
 	htmlTemplatePath, textTemplatePath        string
@@ -41,6 +47,19 @@ func main() {
 
 	checkAndHandleMissingFlags(flags)
 
+	csv, err := os.Open(csvPath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, err.Error())
+		os.Exit(2)
+	}
+	defer csv.Close()
+
+	recipients, emailField, err := readCSV(csvPath)
+	if err != nil {
+		fmt.Fprint(os.Stderr, err.Error())
+		os.Exit(2)
+	}
+
 	mailer := mail.NewMailer(
 		smtpUser,
 		smtpPassword,
@@ -48,14 +67,18 @@ func main() {
 		smtpPort,
 	)
 
-	message := &mail.Message{
-		Sender:   sender,
-		To:       []string{"zach@zachlatta.com"},
-		Subject:  subject,
-		Template: textTemplatePath,
-	}
+	// TODO: Make concurrent
+	for _, recipient := range *recipients {
+		message := &mail.Message{
+			Sender:   sender,
+			To:       []string{recipient[*emailField]},
+			Subject:  subject,
+			Template: textTemplatePath,
+			Context:  recipient,
+		}
 
-	mailer.Send(message)
+		mailer.Send(message)
+	}
 }
 
 func checkAndHandleMissingFlags(flags []*flag.Flag) {
@@ -118,4 +141,54 @@ func printMissingFlags(w io.Writer, missingFlags []*flag.Flag) {
 func missingFlags(missingFlags []*flag.Flag) {
 	printMissingFlags(os.Stderr, missingFlags)
 	os.Exit(2)
+}
+
+func readCSV(path string) (*[]Recipient, *string, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, nil, err
+	}
+	defer file.Close()
+
+	var (
+		header     []string
+		emailField string
+		recipients []Recipient
+	)
+
+	reader, headerRead := csv.NewReader(file), false
+	for {
+		fields, err := reader.Read()
+		if err == io.EOF {
+			break
+		} else if err != nil {
+			return nil, nil, err
+		}
+
+		if headerRead {
+			recipient := make(Recipient)
+
+			for i, key := range header {
+				recipient[key] = fields[i]
+			}
+
+			recipients = append(recipients, recipient)
+		} else {
+			header = fields
+
+			for _, v := range header {
+				if strings.ToLower(v) == "email" {
+					emailField = v
+				}
+			}
+
+			if emailField == "" {
+				return nil, nil, errors.New("Email field missing in header.")
+			}
+
+			headerRead = true
+		}
+	}
+
+	return &recipients, &emailField, nil
 }
