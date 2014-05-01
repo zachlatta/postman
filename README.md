@@ -48,6 +48,9 @@ martin@gpp.com,Martin,Robot
 trillian@mcmillan.com,Trillian,Human
 ```
 
+Please check out (and contribute to) [the usage page on the
+wiki](https://github.com/zachlatta/postman/wiki/Usage) for more details.
+
 ## License
 
 The MIT License (MIT)
