@@ -31,23 +31,23 @@ $ postman -html template.html -text template.txt -csv recipients.csv \
 template.html:
 
 ```
-<h1>Hello, {{.Name}}!</h1>
+<h1>Hello, {{.Name}}! You are a {{.Type}}</h1>
 ```
 
 template.txt:
 
 ```
-Hello, {{.Name}}!
+Hello, {{.Name}}! You are a {{.Type}}.
 ```
 
 recipients.csv:
 
 ```
-Email,Name
-arthur@dent.com,Arthur Dent
-ford@prefect.com,Ford Prefect
-martin@gpp.com,Martin
-trillian@mcmillan.com,Trillian
+Email,Name,Type
+arthur@dent.com,Arthur Dent,Human
+ford@prefect.com,Ford Prefect,Human
+martin@gpp.com,Martin,Robot
+trillian@mcmillan.com,Trillian,Human
 ```
 
 ## License
