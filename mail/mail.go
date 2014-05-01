@@ -9,7 +9,7 @@ import (
 	"net/smtp"
 	"text/template"
 
-	"github.com/jordan-wright/email"
+	"github.com/jpoehls/gophermail"
 )
 
 // Mailer encapsulates data used for sending email.
@@ -33,15 +33,15 @@ func NewMailer(username, password, host, port string) Mailer {
 
 // An email message.
 type message struct {
-	email *email.Email
+	msg *gophermail.Message
 }
 
 func NewMessage(from, to *mail.Address, subject, templatePath,
 	htmlTemplatePath string, context interface{}) (*message, error) {
 	msg := &message{
-		email: &email.Email{
-			From:    from.String(),
-			To:      []string{to.String()},
+		msg: &gophermail.Message{
+			From:    *from,
+			To:      []mail.Address{*to},
 			Subject: subject,
 		},
 	}
@@ -52,7 +52,7 @@ func NewMessage(from, to *mail.Address, subject, templatePath,
 			return nil, err
 		}
 
-		msg.email.Text = parsed
+		msg.msg.Body = parsed
 	}
 
 	if htmlTemplatePath != "" {
@@ -61,16 +61,16 @@ func NewMessage(from, to *mail.Address, subject, templatePath,
 			return nil, err
 		}
 
-		msg.email.HTML = parsed
+		msg.msg.HTMLBody = parsed
 	}
 
 	return msg, nil
 }
 
-func parseTemplate(templatePath string, context interface{}) ([]byte, error) {
+func parseTemplate(templatePath string, context interface{}) (string, error) {
 	tmplBytes, err := ioutil.ReadFile(templatePath)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	t := template.Must(template.New("emailBody").Parse(string(tmplBytes)))
@@ -78,17 +78,18 @@ func parseTemplate(templatePath string, context interface{}) ([]byte, error) {
 	var doc bytes.Buffer
 	err = t.Execute(&doc, context)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return doc.Bytes(), nil
+	return string(doc.Bytes()), nil
 }
 
 // Send sends an email message.
 func (m *Mailer) Send(msg *message) error {
-	err := msg.email.Send(
+	err := gophermail.SendMail(
 		m.Address,
 		m.Auth,
+		msg.msg,
 	)
 	if err != nil {
 		return errors.New("Error sending email: " + err.Error())
