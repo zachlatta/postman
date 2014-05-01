@@ -1,5 +1,5 @@
-Email,Name
-arthur@dent.com,Arthur Dent
-ford@prefect.com,Ford Prefect
-martin@gpp.com,Martin
-trillian@mcmillan.com,Trillian
+Email,Name,Type
+arthur@dent.com,Arthur Dent,Human
+ford@prefect.com,Ford Prefect,Human
+martin@gpp.com,Martin,Robot
+trillian@mcmillan.com,Trillian,Human
