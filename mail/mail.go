@@ -5,8 +5,11 @@ import (
 	"bytes"
 	"errors"
 	"io/ioutil"
+	"net/mail"
 	"net/smtp"
 	"text/template"
+
+	"github.com/jpoehls/gophermail"
 )
 
 // Mailer encapsulates data used for sending email.
@@ -28,65 +31,65 @@ func NewMailer(username, password, host, port string) Mailer {
 	}
 }
 
-// An email message. Include either the Body or Template field. If both are
-// included, only Template will be used.
-type Message struct {
-	Sender   string
-	To       []string
-	Subject  string
-	Body     string
-	Template string      // Path of template to load
-	Context  interface{} // required if Template is used
+// An email message.
+type message struct {
+	msg *gophermail.Message
 }
 
-const emailTemplate = `From: {{.Sender}}
-To: {{range .To}}{{.}},{{end}}
-Subject: {{.Subject}}
+func NewMessage(from, to *mail.Address, subject, templatePath,
+	htmlTemplatePath string, context interface{}) (*message, error) {
+	msg := &message{
+		msg: &gophermail.Message{
+			From:    *from,
+			To:      []mail.Address{*to},
+			Subject: subject,
+		},
+	}
 
-{{.Body}}
-`
+	if templatePath != "" {
+		parsed, err := parseTemplate(templatePath, context)
+		if err != nil {
+			return nil, err
+		}
+
+		msg.msg.Body = parsed
+	}
+
+	if htmlTemplatePath != "" {
+		parsed, err := parseTemplate(htmlTemplatePath, context)
+		if err != nil {
+			return nil, err
+		}
+
+		msg.msg.HTMLBody = parsed
+	}
+
+	return msg, nil
+}
+
+func parseTemplate(templatePath string, context interface{}) (string, error) {
+	tmplBytes, err := ioutil.ReadFile(templatePath)
+	if err != nil {
+		return "", err
+	}
+
+	t := template.Must(template.New("emailBody").Parse(string(tmplBytes)))
+
+	var doc bytes.Buffer
+	err = t.Execute(&doc, context)
+	if err != nil {
+		return "", err
+	}
+
+	return string(doc.Bytes()), nil
+}
 
 // Send sends an email message.
-func (m *Mailer) Send(msg *Message) error {
-	if msg.Template != "" {
-		tmplBytes, err := ioutil.ReadFile(msg.Template)
-		if err != nil {
-			return err
-		}
-
-		t := template.Must(template.New("emailBody").Parse(string(tmplBytes)))
-
-		var doc bytes.Buffer
-		err = t.Execute(&doc, msg.Context)
-		if err != nil {
-			return err
-		}
-
-		msg.Body = string(doc.Bytes())
-	}
-
-	return m.send(msg)
-}
-
-func (m *Mailer) send(msg *Message) error {
-	var doc bytes.Buffer
-
-	t := template.New("emailTemplate")
-	t, err := t.Parse(emailTemplate)
-	if err != nil {
-		return errors.New("Error parsing mail template: " + err.Error())
-	}
-	err = t.Execute(&doc, msg)
-	if err != nil {
-		return errors.New("Error executing mail template: " + err.Error())
-	}
-
-	err = smtp.SendMail(
+func (m *Mailer) Send(msg *message) error {
+	err := gophermail.SendMail(
 		m.Address,
 		m.Auth,
-		msg.Sender,
-		msg.To,
-		doc.Bytes(),
+		msg.msg,
 	)
 	if err != nil {
 		return errors.New("Error sending email: " + err.Error())

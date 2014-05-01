@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	stdMail "net/mail"
 	"os"
 	"text/template"
 
@@ -150,12 +151,29 @@ func missingFlags(missingFlags []*flag.Flag) {
 func sendMail(recipient Recipient, emailField string, mailer *mail.Mailer,
 	success chan Recipient, fail chan error) {
 
-	message := &mail.Message{
-		Sender:   sender,
-		To:       []string{recipient[emailField]},
-		Subject:  subject,
-		Template: textTemplatePath,
-		Context:  recipient,
+	parsedSender, err := stdMail.ParseAddress(sender)
+	if err != nil {
+		fail <- err
+		return
+	}
+
+	parsedTo, err := stdMail.ParseAddress(recipient[emailField])
+	if err != nil {
+		fail <- err
+		return
+	}
+
+	message, err := mail.NewMessage(
+		parsedSender,
+		parsedTo,
+		subject,
+		textTemplatePath,
+		htmlTemplatePath,
+		recipient,
+	)
+	if err != nil {
+		fail <- err
+		return
 	}
 
 	if err := mailer.Send(message); err != nil {
