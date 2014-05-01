@@ -9,6 +9,14 @@ Postman is a command-line utility for batch sending email.
 * Reads template attributes from CSV
 * Works with any SMTP server
 
+##### Why this over a `cat | sed | sendmail < bcc distro_list`?
+
+* Supports both text and HTML parts in emails
+* All of the power of templates in Go (conditionals, etc)
+* Some SMTP providers will complain if there are too many emails in BCC
+  (generally >1000)
+* Sends emails concurrently
+
 ### Installation
 
     $ go get github.com/zachlatta/postman
