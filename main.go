@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"log"
 	stdMail "net/mail"
 	"os"
 	"text/template"
@@ -41,7 +40,6 @@ func main() {
 	flag.Usage = usage
 
 	flag.Parse()
-	log.SetFlags(0)
 
 	checkAndHandleMissingFlags(flags)
 
