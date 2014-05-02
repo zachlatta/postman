@@ -61,6 +61,8 @@ wiki](https://github.com/zachlatta/postman/wiki/Usage) for more details.
 
 ## License
 
+[tl;dr](https://tldrlegal.com/license/mit-license)
+
 The MIT License (MIT)
 
 Copyright (c) 2014 Zach Latta
