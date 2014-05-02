@@ -9,7 +9,7 @@ import (
 	"net/smtp"
 	"text/template"
 
-	"github.com/jpoehls/gophermail"
+	"github.com/jordan-wright/email"
 )
 
 // Mailer encapsulates data used for sending email.
@@ -33,7 +33,7 @@ func NewMailer(username, password, host, port string) Mailer {
 
 // An email Message.
 type Message struct {
-	msg *gophermail.Message
+	msg *email.Email
 }
 
 func (m *Message) String() string {
@@ -41,16 +41,15 @@ func (m *Message) String() string {
 	if err != nil {
 		return err.Error()
 	}
-
 	return string(bytes)
 }
 
 func NewMessage(from, to *mail.Address, subject, templatePath,
 	htmlTemplatePath string, context interface{}) (*Message, error) {
 	msg := &Message{
-		msg: &gophermail.Message{
-			From:    *from,
-			To:      []mail.Address{*to},
+		msg: &email.Email{
+			From:    from.String(),
+			To:      []string{to.String()},
 			Subject: subject,
 		},
 	}
@@ -61,7 +60,7 @@ func NewMessage(from, to *mail.Address, subject, templatePath,
 			return nil, err
 		}
 
-		msg.msg.Body = parsed
+		msg.msg.Text = parsed
 	}
 
 	if htmlTemplatePath != "" {
@@ -70,16 +69,16 @@ func NewMessage(from, to *mail.Address, subject, templatePath,
 			return nil, err
 		}
 
-		msg.msg.HTMLBody = parsed
+		msg.msg.HTML = parsed
 	}
 
 	return msg, nil
 }
 
-func parseTemplate(templatePath string, context interface{}) (string, error) {
+func parseTemplate(templatePath string, context interface{}) ([]byte, error) {
 	tmplBytes, err := ioutil.ReadFile(templatePath)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	t := template.Must(template.New("emailBody").Parse(string(tmplBytes)))
@@ -87,18 +86,17 @@ func parseTemplate(templatePath string, context interface{}) (string, error) {
 	var doc bytes.Buffer
 	err = t.Execute(&doc, context)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return string(doc.Bytes()), nil
+	return doc.Bytes(), nil
 }
 
 // Send sends an email Message.
 func (m *Mailer) Send(msg *Message) error {
-	err := gophermail.SendMail(
+	err := msg.msg.Send(
 		m.Address,
 		m.Auth,
-		msg.msg,
 	)
 	if err != nil {
 		return errors.New("Error sending email: " + err.Error())
