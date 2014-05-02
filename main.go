@@ -32,7 +32,7 @@ func main() {
 	flag.StringVar(&smtpPassword, "password", "", "smtp password")
 	flag.StringVar(&sender, "sender", "", "email to send from")
 	flag.StringVar(&subject, "subject", "", "subject of email")
-	flag.BoolVar(&debug, "debug", false, "whether to operate in debug mode")
+	flag.BoolVar(&debug, "debug", false, "print emails to stdout instead of sending")
 
 	requiredFlagNames := []string{"html", "text", "csv", "server", "port",
 		"user", "password", "sender", "subject"}
