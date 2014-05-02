@@ -31,14 +31,23 @@ func NewMailer(username, password, host, port string) Mailer {
 	}
 }
 
-// An email message.
-type message struct {
+// An email Message.
+type Message struct {
 	msg *gophermail.Message
 }
 
+func (m *Message) String() string {
+	bytes, err := m.msg.Bytes()
+	if err != nil {
+		return err.Error()
+	}
+
+	return string(bytes)
+}
+
 func NewMessage(from, to *mail.Address, subject, templatePath,
-	htmlTemplatePath string, context interface{}) (*message, error) {
-	msg := &message{
+	htmlTemplatePath string, context interface{}) (*Message, error) {
+	msg := &Message{
 		msg: &gophermail.Message{
 			From:    *from,
 			To:      []mail.Address{*to},
@@ -84,8 +93,8 @@ func parseTemplate(templatePath string, context interface{}) (string, error) {
 	return string(doc.Bytes()), nil
 }
 
-// Send sends an email message.
-func (m *Mailer) Send(msg *message) error {
+// Send sends an email Message.
+func (m *Mailer) Send(msg *Message) error {
 	err := gophermail.SendMail(
 		m.Address,
 		m.Auth,

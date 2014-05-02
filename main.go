@@ -17,9 +17,10 @@ var (
 	csvPath                                   string
 	smtpURL, smtpUser, smtpPassword, smtpPort string
 	sender, subject                           string
+	debug                                     bool
 )
 
-var flags []*flag.Flag
+var flags, requiredFlags []*flag.Flag
 
 func main() {
 	flag.StringVar(&htmlTemplatePath, "html", "", "html template path")
@@ -31,16 +32,25 @@ func main() {
 	flag.StringVar(&smtpPassword, "password", "", "smtp password")
 	flag.StringVar(&sender, "sender", "", "email to send from")
 	flag.StringVar(&subject, "subject", "", "subject of email")
+	flag.BoolVar(&debug, "debug", false, "whether to operate in debug mode")
 
+	requiredFlagNames := []string{"html", "text", "csv", "server", "port",
+		"user", "password", "sender", "subject"}
 	flag.VisitAll(func(f *flag.Flag) {
 		flags = append(flags, f)
+
+		for _, name := range requiredFlagNames {
+			if name == f.Name {
+				requiredFlags = append(requiredFlags, f)
+			}
+		}
 	})
 
 	flag.Usage = usage
 
 	flag.Parse()
 
-	checkAndHandleMissingFlags(flags)
+	checkAndHandleMissingFlags(requiredFlags)
 
 	csv, err := os.Open(csvPath)
 	if err != nil {
@@ -62,19 +72,23 @@ func main() {
 		smtpPort,
 	)
 
-	success := make(chan Recipient)
+	success := make(chan *mail.Message)
 	fail := make(chan error)
 
 	go func() {
 		for _, recipient := range *recipients {
-			go sendMail(recipient, *emailField, &mailer, success, fail)
+			go sendMail(recipient, *emailField, &mailer, debug, success, fail)
 		}
 	}()
 
 	for i := 0; i < len(*recipients); i++ {
 		select {
-		case <-success:
-			fmt.Printf("\rEmailed recipient %d of %d...", i+1, len(*recipients))
+		case msg := <-success:
+			if !debug {
+				fmt.Printf("\rEmailed recipient %d of %d...", i+1, len(*recipients))
+			} else {
+				fmt.Printf("%s\n\n\n", msg.String())
+			}
 		case err := <-fail:
 			fmt.Fprintln(os.Stderr, "\nError sending email:", err.Error())
 			os.Exit(2)
@@ -83,9 +97,9 @@ func main() {
 	fmt.Println()
 }
 
-func checkAndHandleMissingFlags(flags []*flag.Flag) {
+func checkAndHandleMissingFlags(requiredFlags []*flag.Flag) {
 	var flagsMissing []*flag.Flag
-	for _, f := range flags {
+	for _, f := range requiredFlags {
 		if f.Value.String() == "" {
 			flagsMissing = append(flagsMissing, f)
 		}
@@ -93,7 +107,7 @@ func checkAndHandleMissingFlags(flags []*flag.Flag) {
 
 	missingCount := len(flagsMissing)
 	if missingCount > 0 {
-		if missingCount == len(flags) {
+		if missingCount == len(requiredFlags) {
 			usage()
 		}
 

@@ -7,7 +7,7 @@ import (
 )
 
 func sendMail(recipient Recipient, emailField string, mailer *mail.Mailer,
-	success chan Recipient, fail chan error) {
+	debug bool, success chan *mail.Message, fail chan error) {
 
 	parsedSender, err := stdMail.ParseAddress(sender)
 	if err != nil {
@@ -34,10 +34,12 @@ func sendMail(recipient Recipient, emailField string, mailer *mail.Mailer,
 		return
 	}
 
-	if err := mailer.Send(message); err != nil {
-		fail <- err
-		return
+	if !debug {
+		if err := mailer.Send(message); err != nil {
+			fail <- err
+			return
+		}
 	}
 
-	success <- recipient
+	success <- message
 }
