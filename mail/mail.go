@@ -44,7 +44,7 @@ func (m *Message) String() string {
 	return string(bytes)
 }
 
-func NewMessage(from, to *mail.Address, subject, templatePath,
+func NewMessage(from, to *mail.Address, subject string, files []string, templatePath,
 	htmlTemplatePath string, context interface{}) (*Message, error) {
 	msg := &Message{
 		msg: &email.Email{
@@ -52,6 +52,13 @@ func NewMessage(from, to *mail.Address, subject, templatePath,
 			To:      []string{to.String()},
 			Subject: subject,
 		},
+	}
+
+	for _, file := range files {
+		_, err := msg.msg.AttachFile(file)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	if templatePath != "" {
