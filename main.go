@@ -54,7 +54,11 @@ func main() {
 
 	flag.Parse()
 
-	files = strings.Split(attach, ",")
+	if attach != "" {
+		files = strings.Split(attach, ",")
+	} else {
+		files = []string{}
+	}
 
 	checkAndHandleMissingFlags(requiredFlags)
 
