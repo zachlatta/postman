@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 	"text/template"
 
 	"github.com/zachlatta/postman/mail"
@@ -17,6 +18,8 @@ var (
 	csvPath                                   string
 	smtpURL, smtpUser, smtpPassword, smtpPort string
 	sender, subject                           string
+	attach                                    string
+	files                                     []string
 	debug                                     bool
 )
 
@@ -33,6 +36,7 @@ func main() {
 	flag.StringVar(&sender, "sender", "", "email to send from")
 	flag.StringVar(&subject, "subject", "", "subject of email")
 	flag.BoolVar(&debug, "debug", false, "print emails to stdout instead of sending")
+	flag.StringVar(&attach, "attach", "", "attach a list of comma separated files")
 
 	requiredFlagNames := []string{"html", "text", "csv", "server", "port",
 		"user", "password", "sender", "subject"}
@@ -49,6 +53,12 @@ func main() {
 	flag.Usage = usage
 
 	flag.Parse()
+
+	if attach != "" {
+		files = strings.Split(attach, ",")
+	} else {
+		files = []string{}
+	}
 
 	checkAndHandleMissingFlags(requiredFlags)
 
