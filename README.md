@@ -1,7 +1,7 @@
 # Postman ![Analytics](https://ga-beacon.appspot.com/UA-34529482-6/postman/readme?pixel)
 
 <img src="http://gh.landersbenjamin.com/everything-sloths/svg/mail.svg" width="130" alt="Postman Icon" align="right">
-Postman is a command-line utility for batch sending email.
+Postman is a command-line utility for batch-sending email.
 
 #### Features
 
