@@ -4,10 +4,11 @@ import (
 	stdMail "net/mail"
 
 	"github.com/zachlatta/postman/mail"
+	"github.com/jordan-wright/email"
 )
 
 func sendMail(recipient Recipient, emailField string, mailer *mail.Mailer,
-	debug bool, success chan *mail.Message, fail chan error) {
+	debug bool, success chan *email.Email, fail chan error) {
 
 	parsedSender, err := stdMail.ParseAddress(sender)
 	if err != nil {

@@ -9,6 +9,7 @@ import (
 	"text/template"
 
 	"github.com/zachlatta/postman/mail"
+	"github.com/jordan-wright/email"
 )
 
 type Recipient map[string]string
@@ -82,7 +83,7 @@ func main() {
 		smtpPort,
 	)
 
-	success := make(chan *mail.Message)
+	success := make(chan *email.Email)
 	fail := make(chan error)
 
 	go func() {
@@ -97,7 +98,11 @@ func main() {
 			if !debug {
 				fmt.Printf("\rEmailed recipient %d of %d...", i+1, len(*recipients))
 			} else {
-				fmt.Printf("%s\n\n\n", msg.String())
+				bytes, err := msg.Bytes()
+				if err != nil {
+					fmt.Printf("Error parsing email: %v", err)
+				}
+				fmt.Printf("%s\n\n\n", string(bytes))
 			}
 		case err := <-fail:
 			fmt.Fprintln(os.Stderr, "\nError sending email:", err.Error())
