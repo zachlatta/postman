@@ -31,31 +31,16 @@ func NewMailer(username, password, host, port string) Mailer {
 	}
 }
 
-// An email Message.
-type Message struct {
-	msg *email.Email
-}
-
-func (m *Message) String() string {
-	bytes, err := m.msg.Bytes()
-	if err != nil {
-		return err.Error()
-	}
-	return string(bytes)
-}
-
 func NewMessage(from, to *mail.Address, subject string, files []string, templatePath,
-	htmlTemplatePath string, context interface{}) (*Message, error) {
-	msg := &Message{
-		msg: &email.Email{
-			From:    from.String(),
-			To:      []string{to.String()},
-			Subject: subject,
-		},
+	htmlTemplatePath string, context interface{}) (*email.Email, error) {
+	msg := &email.Email{
+		From:    from.String(),
+		To:      []string{to.String()},
+		Subject: subject,
 	}
 
 	for _, file := range files {
-		_, err := msg.msg.AttachFile(file)
+		_, err := msg.AttachFile(file)
 		if err != nil {
 			return nil, err
 		}
@@ -67,7 +52,7 @@ func NewMessage(from, to *mail.Address, subject string, files []string, template
 			return nil, err
 		}
 
-		msg.msg.Text = parsed
+		msg.Text = parsed
 	}
 
 	if htmlTemplatePath != "" {
@@ -76,7 +61,7 @@ func NewMessage(from, to *mail.Address, subject string, files []string, template
 			return nil, err
 		}
 
-		msg.msg.HTML = parsed
+		msg.HTML = parsed
 	}
 
 	return msg, nil
@@ -100,8 +85,8 @@ func parseTemplate(templatePath string, context interface{}) ([]byte, error) {
 }
 
 // Send sends an email Message.
-func (m *Mailer) Send(msg *Message) error {
-	err := msg.msg.Send(
+func (m *Mailer) Send(msg *email.Email) error {
+	err := msg.Send(
 		m.Address,
 		m.Auth,
 	)
