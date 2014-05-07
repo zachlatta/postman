@@ -8,8 +8,8 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/zachlatta/postman/mail"
 	"github.com/jordan-wright/email"
+	"github.com/zachlatta/postman/mail"
 )
 
 type Recipient map[string]string
@@ -39,8 +39,8 @@ func main() {
 	flag.BoolVar(&debug, "debug", false, "print emails to stdout instead of sending")
 	flag.StringVar(&attach, "attach", "", "attach a list of comma separated files")
 
-	requiredFlagNames := []string{"html", "text", "csv", "server", "port",
-		"user", "password", "sender", "subject"}
+	requiredFlagNames := []string{"text", "csv", "server", "port", "user",
+		"password", "sender", "subject"}
 	flag.VisitAll(func(f *flag.Flag) {
 		flags = append(flags, f)
 

@@ -3,8 +3,8 @@ package main
 import (
 	stdMail "net/mail"
 
-	"github.com/zachlatta/postman/mail"
 	"github.com/jordan-wright/email"
+	"github.com/zachlatta/postman/mail"
 )
 
 func sendMail(recipient Recipient, emailField string, mailer *mail.Mailer,
@@ -22,6 +22,10 @@ func sendMail(recipient Recipient, emailField string, mailer *mail.Mailer,
 		return
 	}
 
+	// Should probably add a clearer distinction somewhere, but in the case that
+	// the user doesn't provide the -html flag, htmlTemplatePath will be an empty
+	// string. If it's an empty string, then it'll be ignored and not parsed and
+	// added to the message within the mail.NewMessage method.
 	message, err := mail.NewMessage(
 		parsedSender,
 		parsedTo,
