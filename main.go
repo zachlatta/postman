@@ -22,6 +22,7 @@ var (
 	attach                                    string
 	files                                     []string
 	debug                                     bool
+	workerCount                               int
 )
 
 var flags, requiredFlags []*flag.Flag
@@ -38,6 +39,7 @@ func main() {
 	flag.StringVar(&subject, "subject", "", "subject of email")
 	flag.BoolVar(&debug, "debug", false, "print emails to stdout instead of sending")
 	flag.StringVar(&attach, "attach", "", "attach a list of comma separated files")
+	flag.IntVar(&workerCount, "c", 8, "number of concurrent requests to have")
 
 	requiredFlagNames := []string{"text", "csv", "server", "port", "user",
 		"password", "sender", "subject"}
@@ -83,14 +85,24 @@ func main() {
 		smtpPort,
 	)
 
+	jobs := make(chan Recipient, len(*recipients))
 	success := make(chan *email.Email)
 	fail := make(chan error)
 
-	go func() {
-		for _, recipient := range *recipients {
-			go sendMail(recipient, *emailField, &mailer, debug, success, fail)
-		}
-	}()
+	// Start workers
+	for i := 0; i < workerCount; i++ {
+		go func() {
+			for recipient := range jobs {
+				sendMail(recipient, *emailField, &mailer, debug, success, fail)
+			}
+		}()
+	}
+
+	// Send jobs to workers
+	for _, recipient := range *recipients {
+		jobs <- recipient
+	}
+	close(jobs)
 
 	for i := 0; i < len(*recipients); i++ {
 		select {
