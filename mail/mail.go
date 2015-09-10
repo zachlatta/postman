@@ -9,7 +9,7 @@ import (
 	"net/smtp"
 	"text/template"
 
-	"github.com/jordan-wright/email"
+	"gopkg.in/jordan-wright/email.v1"
 )
 
 // Mailer encapsulates data used for sending email.

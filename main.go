@@ -8,7 +8,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/jordan-wright/email"
+	"gopkg.in/jordan-wright/email.v1"
 	"github.com/zachlatta/postman/mail"
 )
 
