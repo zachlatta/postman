@@ -3,23 +3,25 @@ package mail
 
 import (
 	"bytes"
+	"crypto/tls"
 	"errors"
 	"io/ioutil"
 	"net/mail"
 	"net/smtp"
 	"text/template"
 
-	"gopkg.in/jordan-wright/email.v1"
+	"gopkg.in/jordan-wright/email.v2"
 )
 
 // Mailer encapsulates data used for sending email.
 type Mailer struct {
 	Auth    smtp.Auth
 	Address string
+	TLS     *tls.Config
 }
 
 // NewMailer creates a new Mailer.
-func NewMailer(username, password, host, port string) Mailer {
+func NewMailer(username, password, host, port string, skipCertValidation bool) Mailer {
 	return Mailer{
 		Auth: smtp.PlainAuth(
 			"",
@@ -28,6 +30,10 @@ func NewMailer(username, password, host, port string) Mailer {
 			host,
 		),
 		Address: host + ":" + port,
+		TLS: &tls.Config{
+			InsecureSkipVerify: skipCertValidation,
+			ServerName:         host,
+		},
 	}
 }
 
@@ -86,9 +92,10 @@ func parseTemplate(templatePath string, context interface{}) ([]byte, error) {
 
 // Send sends an email Message.
 func (m *Mailer) Send(msg *email.Email) error {
-	err := msg.Send(
+	err := msg.SendWithTLS(
 		m.Address,
 		m.Auth,
+		m.TLS,
 	)
 	if err != nil {
 		return errors.New("Error sending email: " + err.Error())
