@@ -3,8 +3,8 @@ package main
 import (
 	stdMail "net/mail"
 
-	"gopkg.in/jordan-wright/email.v1"
 	"github.com/zachlatta/postman/mail"
+	"gopkg.in/jordan-wright/email.v2"
 )
 
 func sendMail(recipient Recipient, emailField string, mailer *mail.Mailer,
