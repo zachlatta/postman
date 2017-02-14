@@ -43,8 +43,14 @@ func main() {
 	flag.StringVar(&attach, "attach", "", "attach a list of comma separated files")
 	flag.IntVar(&workerCount, "c", 8, "number of concurrent requests to have")
 
-	requiredFlagNames := []string{"text", "csv", "server", "port", "user",
-		"password", "sender", "subject"}
+	requiredFlagNames := []string{
+		"text",
+		"csv",
+		"server",
+		"port",
+		"sender",
+		"subject",
+	}
 	flag.VisitAll(func(f *flag.Flag) {
 		flags = append(flags, f)
 
