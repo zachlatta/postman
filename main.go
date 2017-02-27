@@ -8,19 +8,22 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/zachlatta/postman/mail"
 	"gopkg.in/jordan-wright/email.v2"
 )
 
 type Recipient map[string]string
 
 var (
-	htmlTemplatePath, textTemplatePath, csvPath string
-	smtpURL, smtpUser, smtpPassword, smtpPort   string
-	sender, subject, attach                     string
-	files                                       []string
-	debug                                       bool
-	skipCertValidation                          bool
-	workerCount                                 int
+	htmlTemplatePath, textTemplatePath        string
+	csvPath                                   string
+	smtpURL, smtpUser, smtpPassword, smtpPort string
+	sender, subject                           string
+	attach                                    string
+	files                                     []string
+	debug                                     bool
+	skipCertValidation                        bool
+	workerCount                               int
 )
 
 var flags, requiredFlags []*flag.Flag
@@ -83,7 +86,7 @@ func main() {
 		os.Exit(2)
 	}
 
-	mailer := NewMailer(
+	mailer := mail.NewMailer(
 		smtpUser,
 		smtpPassword,
 		smtpURL,
