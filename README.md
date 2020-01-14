@@ -1,7 +1,7 @@
 # Postman
 
 <img src="https://cdn.rawgit.com/TheThirdOne/everything-sloths/master/svg/mail.svg" width="130" alt="Postman Icon" align="right">
-Postman is a command-line utility for batch-sending email.
+Postman is a CLI utility for batch-sending email through backend-agnostic SMTP (so you can use Postman with your personal Gmail, Amazon SES, Sendgrid, or anything else you'd like).
 
 #### Features
 
