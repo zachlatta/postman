@@ -39,10 +39,15 @@ func NewMailer(username, password, host, port string, skipCertValidation bool) M
 
 func NewMessage(from, to *mail.Address, subject string, files []string, templatePath,
 	htmlTemplatePath string, context interface{}) (*email.Email, error) {
+	parsedSubject, err := parseTemplate(subject, context)
+	if err != nil {
+		return nil, err
+	}
+
 	msg := &email.Email{
 		From:    from.String(),
 		To:      []string{to.String()},
-		Subject: subject,
+		Subject: parsedSubject,
 	}
 
 	for _, file := range files {
