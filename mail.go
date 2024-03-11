@@ -3,7 +3,7 @@ package main
 import (
 	stdMail "net/mail"
 
-	"github.com/zachlatta/postman/mail"
+	"github.com/pepa65/postman/mail"
 	"gopkg.in/jordan-wright/email.v2"
 )
 

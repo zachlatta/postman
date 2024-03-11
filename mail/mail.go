@@ -39,10 +39,15 @@ func NewMailer(username, password, host, port string, skipCertValidation bool) M
 
 func NewMessage(from, to *mail.Address, subject string, files []string, templatePath,
 	htmlTemplatePath string, context interface{}) (*email.Email, error) {
+	parsedSubject, err := parseText([]byte(subject), context)
+	if err != nil {
+		return nil, err
+	}
+
 	msg := &email.Email{
 		From:    from.String(),
 		To:      []string{to.String()},
-		Subject: subject,
+		Subject: string(parsedSubject),
 	}
 
 	for _, file := range files {
@@ -78,16 +83,18 @@ func parseTemplate(templatePath string, context interface{}) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	return parseText(tmplBytes, context)
+}
 
+func parseText(tmplBytes []byte, context interface{}) ([]byte, error) {
 	t := template.Must(template.New("emailBody").Parse(string(tmplBytes)))
-
-	var doc bytes.Buffer
-	err = t.Execute(&doc, context)
+	var txt bytes.Buffer
+	err := t.Execute(&txt, context)
 	if err != nil {
 		return nil, err
 	}
 
-	return doc.Bytes(), nil
+	return txt.Bytes(), nil
 }
 
 // Send sends an email Message.
